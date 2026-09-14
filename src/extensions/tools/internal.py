@@ -4,6 +4,13 @@ from adapters import get_web_search
 import trafilatura
 from ..mcp import add_mcp_server, update_mcp_server
 
+AUTO_RUN_TOOLS = set()
+
+def auto_run(func):
+    """Marks a tool as safe to run without asking the user for permission first."""
+    AUTO_RUN_TOOLS.add(func.__name__)
+    return func
+
 def create_new_skill(name, description, content):
     if not name or not name.strip():
         return "Error: skill name must not be empty."
@@ -21,6 +28,7 @@ def create_new_skill(name, description, content):
         skill_file_content = build_skill_file(description, content)
         file.write(skill_file_content)
 
+@auto_run
 def int_add_new_skill(name, description, content):
     error = create_new_skill(name, description, content)
     if error:
@@ -28,6 +36,7 @@ def int_add_new_skill(name, description, content):
 
     update_skills_index(name, description)
 
+@auto_run
 def int_get_skill_content(name):
     content = get_skill_by_name(name)
 
@@ -36,6 +45,7 @@ def int_get_skill_content(name):
 
     return content
 
+@auto_run
 def int_web_search_tool(query):
     return get_web_search().search(query)
 
@@ -52,6 +62,7 @@ def int_fetch_content_from_url(url):
 
     return content
 
+@auto_run
 def int_add_mcp_server(name, url, command, args):
     try:
         available_tool_names = add_mcp_server(name, url=url, command=command, args=args)
@@ -60,6 +71,7 @@ def int_add_mcp_server(name, url, command, args):
         
     return f"Added MCP server '{name}'. Discovered tools: {','.join(available_tool_names)}"
 
+@auto_run
 def int_update_mcp_server(name):
     try:
         available_tool_names = update_mcp_server(name)
