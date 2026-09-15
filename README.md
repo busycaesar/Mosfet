@@ -53,6 +53,7 @@ Mosfet is an LLM-powered agent that you extend by adding **Skills**, **Tools** a
 - Connect the agent to MCP servers so it can use their tools.
 - The agent can work through multiple steps on its own before giving you a final answer.
 - See what the agent is doing as it works, like loading a skill or calling a tool, instead of just watching a spinner.
+- Safe, read-only actions run automatically, but the agent asks for your permission before doing anything else.
 - Messages are checked for sensitive personal information before they reach the LLM and before a response reaches you.
 - Point the agent at whichever LLM provider and model you want, hosted or local, and change it anytime.
 - Install once and run the agent from anywhere on your machine.
@@ -65,6 +66,7 @@ Mosfet is an LLM-powered agent that you extend by adding **Skills**, **Tools** a
  ├── main.py                     # Entry point
  ├── llm.py                      # Guarded LLM entry point used by the agent loop
  ├── config_setup.py             # Guided setup/update for provider config and credentials
+ ├── update.py                   # Updates the local install to the latest release
  ├── core/                       # Agent loop and skill/tool orchestration
  ├── adapters/                   # Per-provider LLM and web-search adapters behind common interfaces
  │    ├── llm_providers/
@@ -105,6 +107,12 @@ Start chatting on Discord. Runs in the background by default so you don't need t
 mosfet discord              # start in the background
 mosfet discord --foreground # attach to this terminal instead
 mosfet discord --stop       # stop a background bot
+```
+
+Update Mosfet to the latest release. Only works for the install-script setup below (Option 1); Docker installs update via `docker compose pull && docker compose up -d` instead.
+
+```bash
+mosfet update
 ```
 
 ## How to run the project?
