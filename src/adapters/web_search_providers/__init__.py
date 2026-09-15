@@ -1,9 +1,11 @@
-from config import WEB_SEARCH_PROVIDER, WEB_SEARCH_MAX_RESULTS, BRAVE_API_KEY
+from config import get_web_search_provider, WEB_SEARCH_MAX_RESULTS, BRAVE_API_KEY
 from .duckduckgo import DuckDuckGoWebSearch
 from .brave import BraveWebSearch
 
 def get_web_search():
-    if WEB_SEARCH_PROVIDER == "Brave":
+    web_search_provider = get_web_search_provider()
+
+    if web_search_provider == "Brave":
         if not BRAVE_API_KEY:
             raise RuntimeError("BRAVE_API_KEY is not set. Set it in .env before running Mosfet.")
 
