@@ -4,6 +4,9 @@ from core import parse_user_input
 from config import DISCORD_MESSAGE_LIMIT
 from .client import client
 from .interaction import confirm_tool_call
+from .activity_log import DiscordActivityLog
+
+activity_log = DiscordActivityLog()
 
 async def send_long_message(channel, text):
     """
@@ -27,12 +30,12 @@ async def on_message(message):
     if not isinstance(message.channel, discord.DMChannel):
         return
 
-    def confirm_tool_call_in_channel(function_name, function_arguments):
-        return confirm_tool_call(message.channel, function_name, function_arguments)
+    def confirm_tool_call_in_channel(function_name):
+        return confirm_tool_call(message.channel, function_name)
 
     async with message.channel.typing():
         try:
-            response = await asyncio.to_thread(parse_user_input, client.messages, message.content, confirm_tool_call_in_channel)
+            response = await asyncio.to_thread(parse_user_input, client.messages, message.content, confirm_tool_call_in_channel, activity_log)
         except Exception as error:
             await message.channel.send(f"Error: {error}. Please try again.")
             return

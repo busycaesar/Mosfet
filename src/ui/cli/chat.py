@@ -7,6 +7,7 @@ from rich.markup import escape
 from core import parse_user_input, build_initial_messages
 from config import BANNER, WELCOME_MESSAGE, GOODBYE_MESSAGE
 from .interaction import confirm_tool_call
+from .activity_log import CLIActivityLog
 
 console = Console()
 
@@ -46,8 +47,17 @@ def run_cli_chat():
         console.print()
 
         try:
-            with console.status("[dim]Biasing the gate...[/dim]", spinner="dots"):
-                response = parse_user_input(messages, user_input, confirm_tool_call)
+            with console.status("[dim]Biasing the gate...[/dim]", spinner="dots") as status:
+
+                def confirm_tool_call_while_paused(function_name):
+                    status.stop()
+                    try:
+                        return confirm_tool_call(function_name)
+                    finally:
+                        status.start()
+
+                activity_log = CLIActivityLog()
+                response = parse_user_input(messages, user_input, confirm_tool_call_while_paused, activity_log)
         except Exception as error:
             console.print(f"[red]Error:[/red] {escape(str(error))}. Please try again.")
             continue
