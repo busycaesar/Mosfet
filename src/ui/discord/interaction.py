@@ -25,18 +25,18 @@ class ConfirmView(discord.ui.View):
         await interaction.response.send_message("Denied.", ephemeral=True)
         self.stop()
 
-async def ask_discord_confirmation(channel, function_name, function_arguments):
+async def ask_discord_confirmation(channel, function_name):
     view = ConfirmView()
 
-    await channel.send(f"Allow tool call `{function_name}({function_arguments})`?", view=view)
+    await channel.send(f"Allow tool call `{function_name}`?", view=view)
 
     await view.wait()
 
     return view.result if view.result is not None else False
 
-def confirm_tool_call(channel, function_name, function_arguments):
+def confirm_tool_call(channel, function_name):
     future = asyncio.run_coroutine_threadsafe(
-        ask_discord_confirmation(channel, function_name, function_arguments),
+        ask_discord_confirmation(channel, function_name),
         client.loop,
     )
     return future.result()
