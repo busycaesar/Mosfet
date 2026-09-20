@@ -3,7 +3,7 @@ import sys
 import signal
 import subprocess
 from config import DISCORD_BOT_TOKEN, RUNTIME_PATH, DISCORD_LOG_PATH, DISCORD_PID_PATH
-from core import build_initial_messages
+from core import start_session
 from .client import client
 from . import chat
 
@@ -19,7 +19,7 @@ def run_discord_chat():
     if not DISCORD_BOT_TOKEN:
         raise RuntimeError("DISCORD_BOT_TOKEN is not set. Add it to your .env file before running Mosfet.")
 
-    client.messages = build_initial_messages()
+    client.conversation = start_session("discord")
 
     client.run(DISCORD_BOT_TOKEN)
 

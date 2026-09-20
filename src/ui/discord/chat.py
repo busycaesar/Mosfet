@@ -33,11 +33,22 @@ async def on_message(message):
     def confirm_tool_call_in_channel(function_name):
         return confirm_tool_call(message.channel, function_name)
 
+    conversation = client.conversation
+    start_index = len(conversation.messages)
+
     async with message.channel.typing():
         try:
-            response = await asyncio.to_thread(parse_user_input, client.messages, message.content, confirm_tool_call_in_channel, activity_log)
+            response = await asyncio.to_thread(
+                parse_user_input, 
+                conversation.messages, 
+                message.content, 
+                confirm_tool_call_in_channel, 
+                activity_log
+            )
         except Exception as error:
             await message.channel.send(f"Error: {error}. Please try again.")
             return
+
+    conversation.save_turn(start_index)
 
     await send_long_message(message.channel, response)

@@ -4,7 +4,7 @@ from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.formatted_text import ANSI
 from rich.console import Console
 from rich.markup import escape
-from core import parse_user_input, build_initial_messages
+from core import parse_user_input, start_session
 from config import BANNER, WELCOME_MESSAGE, GOODBYE_MESSAGE
 from .interaction import confirm_tool_call
 from .activity_log import CLIActivityLog
@@ -15,10 +15,13 @@ PROMPT = ANSI("\033[1m\033[38;2;250;104;0m❯\033[0m ")
 session = PromptSession(history=InMemoryHistory(), erase_when_done=True)
 
 def run_cli_chat():
-    messages = build_initial_messages()
+    conversation = start_session("cli")
 
     console.print(BANNER, style="bold #fa6800")
     console.print(WELCOME_MESSAGE)
+
+    if conversation.resumed:
+        console.print("[dim]Resumed your previous conversation.[/dim]")
 
     while True:
         try:
@@ -43,6 +46,7 @@ def run_cli_chat():
             break
 
         start_time = time.monotonic()
+        start_index = len(conversation.messages)
 
         console.print()
 
@@ -57,10 +61,17 @@ def run_cli_chat():
                         status.start()
 
                 activity_log = CLIActivityLog()
-                response = parse_user_input(messages, user_input, confirm_tool_call_while_paused, activity_log)
+                response = parse_user_input(
+                    conversation.messages, 
+                    user_input, 
+                    confirm_tool_call_while_paused, 
+                    activity_log
+                )
         except Exception as error:
             console.print(f"[red]Error:[/red] {escape(str(error))}. Please try again.")
             continue
+
+        conversation.save_turn(start_index)
 
         elapsed = time.monotonic() - start_time
 
