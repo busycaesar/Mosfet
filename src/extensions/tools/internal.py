@@ -11,6 +11,9 @@ def auto_run(func):
     AUTO_RUN_TOOLS.add(func.__name__)
     return func
 
+def normalize_skill_name(name):
+    return name.lower().replace(" ", "_")
+
 def create_new_skill(name, description, content):
     if not name or not name.strip():
         return "Error: skill name must not be empty."
@@ -19,7 +22,7 @@ def create_new_skill(name, description, content):
     if not content or not content.strip():
         return "Error: skill content must not be empty."
 
-    name = name.lower().replace(" ", "_")
+    name = normalize_skill_name(name)
 
     SKILLS_PATH.mkdir(parents=True, exist_ok=True)
     skill_path = SKILLS_PATH / f"{name}.md"
@@ -34,7 +37,7 @@ def int_add_new_skill(name, description, content):
     if error:
         return error
 
-    update_skills_index(name, description)
+    update_skills_index(normalize_skill_name(name), description)
 
 @auto_run
 def int_get_skill_content(name):
