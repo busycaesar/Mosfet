@@ -23,11 +23,15 @@ class Session:
     One conversation for one channel. Only the messages added after the initial system messages are stored on disk.
     """
     
-    def __init__(self, channel, messages, path, resumed=False):
+    def __init__(self, channel, messages, path, resumed=False, destination=None):
         self.channel = channel
         self.messages = messages
         self.path = path
         self.resumed = resumed
+        self.destination = destination
+
+    def set_destination(self, destination):
+        self.destination = destination
 
     def _build_header(self):
         return {
@@ -35,6 +39,7 @@ class Session:
             "channel": self.channel,
             "provider": get_llm_provider(),
             "created": datetime.now(timezone.utc).isoformat(),
+            "destination": self.destination,
         }
     
     def save_turn(self, start_index):
@@ -100,7 +105,7 @@ def _load_session(channel, path):
         return None
 
     # The initial system messages are rebuilt so the available-skills list is current.
-    return Session(channel, build_initial_messages() + saved_messages, path, resumed=True)
+    return Session(channel, build_initial_messages() + saved_messages, path, resumed=True, destination=header.get("destination"))
 
 def _parse_session_file(path):
     lines = [line for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]

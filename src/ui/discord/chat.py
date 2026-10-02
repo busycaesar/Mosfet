@@ -34,6 +34,7 @@ async def on_message(message):
         return confirm_tool_call(message.channel, function_name)
 
     conversation = client.conversation
+    conversation.set_destination(message.channel.id)
     start_index = len(conversation.messages)
 
     async with message.channel.typing():
