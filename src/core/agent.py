@@ -1,5 +1,5 @@
 from llm import get_llm
-from .slash_command import get_skill_content
+from .slash_command import get_slash_command_content
 from extensions import get_tools, call_tool_function, AUTO_RUN_TOOLS
 import json
 from utils import clean_response
@@ -8,10 +8,10 @@ def parse_user_input(messages, user_input, confirm_tool_call, activity_log):
     original_length = len(messages)
 
     try:
-        skill_content = get_skill_content(user_input)
+        slash_command_content = get_slash_command_content(user_input)
 
-        if skill_content is not None:
-            messages.append({"role": "system", "content": skill_content})
+        if slash_command_content is not None:
+            messages.append({"role": "system", "content": slash_command_content})
             activity_log.skill_injected(user_input)
 
         messages.append({"role": "user", "content": user_input})

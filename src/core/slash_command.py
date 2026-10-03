@@ -1,6 +1,6 @@
-from utils import get_skill_by_name
+from utils import get_skill_by_name, get_workflow_by_name
 
-def get_skill_content(user_input):
+def get_slash_command_content(user_input):
     if not user_input.startswith("/"):
         return None
 
@@ -9,4 +9,4 @@ def get_skill_content(user_input):
     if not parts:
         return None
 
-    return get_skill_by_name(parts[0])
+    return get_skill_by_name(parts[0]) or get_workflow_by_name(parts[0])
