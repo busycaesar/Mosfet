@@ -22,7 +22,7 @@
 
 ## Description
 
-Mosfet is an LLM-powered agent that you extend by adding **Skills**, **Tools** and **MCP Servers**. Each skill describes a capability or piece of knowledge the agent can draw on, tools let it take action, and MCP servers connect it to external systems. The goal is to empower the LLM by simply dropping in more of these building blocks.
+Mosfet is an LLM-powered agent that you extend by adding **Skills**, **Tools**, **MCP Servers**, and **Workflows**. Each skill describes a capability or piece of knowledge the agent can draw on, tools let it take action, MCP servers connect it to external systems, and workflows chain these into a saved, repeatable procedure. The goal is to empower the LLM by simply dropping in more of these building blocks.
 
 > **Status: early-stage / work in progress.** A model-agnostic chat agent that reasons through multiple tool calls before answering, extending itself with skills and MCP servers along the way, with guardrails checking what goes in and out.
 
@@ -50,6 +50,7 @@ Mosfet is an LLM-powered agent that you extend by adding **Skills**, **Tools** a
 
 - Chat with the agent through your terminal or other communication channels.
 - The agent can create skills for itself and reuse them whenever they apply.
+- Save a multi-step procedure as a workflow, combining skills, tools, and other workflows, and run it again whenever you need it.
 - Connect the agent to MCP servers so it can use their tools.
 - The agent can work through multiple steps on its own before giving you a final answer.
 - See what the agent is doing as it works, like loading a skill or calling a tool, instead of just watching a spinner.
@@ -57,6 +58,7 @@ Mosfet is an LLM-powered agent that you extend by adding **Skills**, **Tools** a
 - Messages are checked for sensitive personal information before they reach the LLM and before a response reaches you.
 - Point the agent at whichever LLM provider and model you want, hosted or local, and change it anytime.
 - Install once and run the agent from anywhere on your machine.
+- Chats pick up where you left off — each channel automatically resumes its last conversation.
 
 ## Project Structure
 
@@ -72,10 +74,11 @@ Mosfet is an LLM-powered agent that you extend by adding **Skills**, **Tools** a
  │    ├── llm_providers/
  │    └── web_search_providers/
  ├── config/                     # Provider selection, seed messages, and shared paths
- ├── extensions/                 # Skills, tools, and MCP servers available to the agent
+ ├── extensions/                 # Skills, tools, MCP servers, and workflows available to the agent
  │    ├── mcp/
  │    ├── skills/
- │    └── tools/
+ │    ├── tools/
+ │    └── workflows/
  ├── guardrails/                 # Content checks run on messages going into and out of the LLM
  ├── ui/                         # Front-ends: terminal chat loop and Discord bot
  └── utils/                      # Shared helpers used across the codebase
