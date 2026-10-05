@@ -1,14 +1,5 @@
-from config import SKILLS_PATH, DELIMITER, SKILLS_INDEX_PATH
+from config import SKILLS_PATH, SKILLS_INDEX_PATH
 import json
-
-def build_skill_file(description, content):
-    return f"""\
-{DELIMITER}
-description: {description}
-{DELIMITER}
-
-{content}
-"""
 
 def get_skills_list():
     if not SKILLS_INDEX_PATH.is_file():

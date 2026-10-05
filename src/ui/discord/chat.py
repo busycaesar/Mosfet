@@ -1,6 +1,6 @@
 import asyncio
 import discord
-from core import parse_user_input
+from core import invoke_agent
 from config import DISCORD_MESSAGE_LIMIT
 from .client import client
 from .interaction import confirm_tool_call
@@ -40,7 +40,7 @@ async def on_message(message):
     async with message.channel.typing():
         try:
             response = await asyncio.to_thread(
-                parse_user_input, 
+                invoke_agent, 
                 conversation.messages, 
                 message.content, 
                 confirm_tool_call_in_channel, 

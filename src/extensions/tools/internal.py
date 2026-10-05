@@ -1,5 +1,5 @@
-from config import SKILLS_PATH
-from utils import build_skill_file, update_skills_index, get_skill_by_name
+from config import SKILLS_PATH, WORKFLOWS_PATH
+from utils import build_content_file, update_skills_index, get_skill_by_name, update_workflows_index
 from adapters import get_web_search
 import trafilatura
 from ..mcp import add_mcp_server, update_mcp_server
@@ -11,7 +11,7 @@ def auto_run(func):
     AUTO_RUN_TOOLS.add(func.__name__)
     return func
 
-def normalize_skill_name(name):
+def normalize_name(name):
     return name.lower().replace(" ", "_")
 
 def create_new_skill(name, description, content):
@@ -22,22 +22,23 @@ def create_new_skill(name, description, content):
     if not content or not content.strip():
         return "Error: skill content must not be empty."
 
-    name = normalize_skill_name(name)
+    name = normalize_name(name)
 
     SKILLS_PATH.mkdir(parents=True, exist_ok=True)
     skill_path = SKILLS_PATH / f"{name}.md"
 
     with open(skill_path, "w") as file:
-        skill_file_content = build_skill_file(description, content)
+        skill_file_content = build_content_file(description, content)
         file.write(skill_file_content)
 
 @auto_run
 def int_add_new_skill(name, description, content):
     error = create_new_skill(name, description, content)
+
     if error:
         return error
 
-    update_skills_index(normalize_skill_name(name), description)
+    update_skills_index(normalize_name(name), description)
 
 @auto_run
 def int_get_skill_content(name):
@@ -47,6 +48,46 @@ def int_get_skill_content(name):
         return f"No skill available with name {name}."
 
     return content
+
+def create_new_workflow(name, description, content):
+    if not name or not name.strip():
+        return "Error: workflow name must not be empty."
+    if not description or not description.strip():
+        return "Error: workflow description must not be empty."
+    if not content or not content.strip():
+        return "Error: workflow content must not be empty."
+
+    name = normalize_name(name)
+
+    WORKFLOWS_PATH.mkdir(parents=True, exist_ok=True)
+    workflow_path = WORKFLOWS_PATH / f"{name}.md"
+
+    with open(workflow_path, "w") as file:
+        workflow_file_content = build_content_file(description, content)
+        file.write(workflow_file_content)
+
+@auto_run
+def int_add_new_workflow(
+        name, 
+        description, 
+        content, 
+        skills, 
+        workflows, 
+        # tools/mcp_tools aren't used here — agent_loop reads them from the raw tool-call arguments after this returns, since confirming each one needs confirm_tool_call, which a plain tool function doesn't get.
+        tools, 
+        mcp_tools
+    ):
+
+    error = create_new_workflow(name, description, content)
+
+    if error:
+        return error
+
+    normalized_name = normalize_name(name)
+
+    update_workflows_index(normalized_name, description, skills, workflows)
+
+    return {"created": True, "workflow_name": normalized_name}
 
 @auto_run
 def int_web_search_tool(query):
@@ -88,6 +129,8 @@ def call_tool_function(name, args):
         return int_add_new_skill(**args)
     elif name == "int_get_skill_content":
         return int_get_skill_content(**args)
+    elif name == "int_add_new_workflow":
+        return int_add_new_workflow(**args)
     elif name == "int_web_search_tool":
         return int_web_search_tool(**args)
     elif name == "int_fetch_content_from_url":
