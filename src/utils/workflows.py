@@ -52,12 +52,14 @@ def load_workflow(name):
 
     return "\n\n".join(sections), list(dict.fromkeys(tools))
 
-def update_workflows_index(name, description, skills, workflows):
+def update_workflows_index(name, description, skills, workflows, tools, mcp_tools):
     index = get_workflows_list()
     index[name] = {
         "description": description,
         "skills": skills,
         "workflows": workflows,
+        "tools": tools,
+        "mcp_tools": mcp_tools,
         "allowed_tools": [],
         "allowed_mcp_tools": [],
     }

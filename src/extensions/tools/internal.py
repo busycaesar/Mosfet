@@ -72,9 +72,8 @@ def int_add_new_workflow(
         description, 
         content, 
         skills, 
-        workflows, 
-        # tools/mcp_tools aren't used here — agent_loop reads them from the raw tool-call arguments after this returns, since confirming each one needs confirm_tool_call, which a plain tool function doesn't get.
-        tools, 
+        workflows,
+        tools,
         mcp_tools
     ):
 
@@ -85,7 +84,7 @@ def int_add_new_workflow(
 
     normalized_name = normalize_name(name)
 
-    update_workflows_index(normalized_name, description, skills, workflows)
+    update_workflows_index(normalized_name, description, skills, workflows, tools, mcp_tools)
 
     return {"created": True, "workflow_name": normalized_name}
 
