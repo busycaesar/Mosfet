@@ -63,8 +63,28 @@ tool_schemas = [
                         "type": "string",
                         "description": "The workflow's ordered steps in Markdown — a numbered list the agent follows in order when the workflow is invoked."
                     },
+                    "skills": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Names of any skills this workflow's steps rely on. Documents the workflow's dependencies; never needs approval since loading a skill is already always allowed. Pass an empty list if none are used."
+                    },
+                    "workflows": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Names of any other already-existing workflows this workflow's steps rely on. Their steps are loaded alongside this workflow's whenever it's invoked, so list every one the steps mention. Pass an empty list if none are used."
+                    },
+                    "tools": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Names of any internal tools (besides the always-available ones) this workflow's steps are likely to need, e.g. int_fetch_content_from_url. Each one not already auto-run gets confirmed with the user right now, once, so this workflow can later be invoked without re-asking. Pass an empty list if none are needed."
+                    },
+                    "mcp_tools": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Names of any MCP-provided tools this workflow's steps are likely to need. MCP tools always need confirmation, so each one gets confirmed with the user right now, once. Pass an empty list if none are needed."
+                    },
                 },
-                "required": ["name", "description", "content"],
+                "required": ["name", "description", "content", "skills", "workflows", "tools", "mcp_tools"],
                 "additionalProperties": False,
             },
             "strict": True

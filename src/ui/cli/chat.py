@@ -4,7 +4,7 @@ from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.formatted_text import ANSI
 from rich.console import Console
 from rich.markup import escape
-from core import parse_user_input, start_session
+from core import invoke_agent, start_session
 from config import BANNER, WELCOME_MESSAGE, GOODBYE_MESSAGE
 from .interaction import confirm_tool_call
 from .activity_log import CLIActivityLog
@@ -61,7 +61,7 @@ def run_cli_chat():
                         status.start()
 
                 activity_log = CLIActivityLog()
-                response = parse_user_input(
+                response = invoke_agent(
                     conversation.messages, 
                     user_input, 
                     confirm_tool_call_while_paused, 

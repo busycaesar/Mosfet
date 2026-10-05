@@ -1,7 +1,7 @@
 import json
 from datetime import datetime, timezone
 from config import SESSIONS_PATH, get_llm_provider
-from .build_initial_message import build_initial_messages
+from .agent import build_initial_messages
 
 SESSION_FILE_SUFFIX = ".jsonl"
 CORRUPT_FILE_SUFFIX = ".corrupt"
