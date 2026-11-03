@@ -47,7 +47,7 @@ tool_schemas = [
         "type": "function",
         "function": {
             "name": "int_add_new_workflow",
-            "description": "Add a new workflow for the user. A workflow is a step-by-step process that chains together tools, skills, and/or MCP tools in order — write its content as an ordered list of steps, not free-form instructions. You still use your own judgment on how to carry out each individual step.",
+            "description": "Add a new workflow for the user. A workflow is a step-by-step process that chains together tools, skills, and/or MCP tools in order — write its content as an ordered list of steps, not free-form instructions. You still use your own judgment on how to carry out each individual step. While it runs, the workflow can use only the tools it and its nested workflows declare, so declare everything its steps need.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -66,7 +66,7 @@ tool_schemas = [
                     "skills": {
                         "type": "array",
                         "items": {"type": "string"},
-                        "description": "Names of any skills this workflow's steps rely on. Documents the workflow's dependencies; never needs approval since loading a skill is already always allowed. Pass an empty list if none are used."
+                        "description": "Names of any skills this workflow's steps rely on. Documents the workflow's dependencies; it doesn't make them loadable, so when you list a skill here, also list int_get_skill_content in tools. Pass an empty list if none are used."
                     },
                     "workflows": {
                         "type": "array",
@@ -76,15 +76,75 @@ tool_schemas = [
                     "tools": {
                         "type": "array",
                         "items": {"type": "string"},
-                        "description": "Names of any internal tools (besides the always-available ones) this workflow's steps are likely to need, e.g. int_fetch_content_from_url. Each one not already auto-run gets confirmed with the user right now, once, so this workflow can later be invoked without re-asking. Pass an empty list if none are needed."
+                        "description": "Names of every internal tool this workflow's steps need, e.g. int_fetch_content_from_url, including the ones that normally run without asking, because any tool left out is unavailable while the workflow runs. Each one not already auto-run gets confirmed with the user right now, once, so this workflow can later be invoked without re-asking. Pass an empty list if none are needed."
                     },
                     "mcp_tools": {
                         "type": "array",
                         "items": {"type": "string"},
-                        "description": "Names of any MCP-provided tools this workflow's steps are likely to need. MCP tools always need confirmation, so each one gets confirmed with the user right now, once. Pass an empty list if none are needed."
+                        "description": "Names of every MCP-provided tool this workflow's steps need; any tool left out is unavailable while the workflow runs. MCP tools always need confirmation, so each one gets confirmed with the user right now, once. Pass an empty list if none are needed."
                     },
                 },
                 "required": ["name", "description", "content", "skills", "workflows", "tools", "mcp_tools"],
+                "additionalProperties": False,
+            },
+            "strict": True
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "int_schedule_job",
+            "description": "Schedule an existing workflow to run on a recurring cron schedule. Each run happens unattended and its result is sent to this conversation, unprompted. Only schedule a workflow the user explicitly named, never pick one yourself. Any tool the workflow needs that isn't approved yet is confirmed with the user once, all together; if refused, the workflow is not scheduled.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "workflow_name": {
+                        "type": "string",
+                        "description": "The exact name of an existing workflow, as named by the user."
+                    },
+                    "workflow_input": {
+                        "type": ["string", "null"],
+                        "description": "The text passed to the workflow on each run, exactly as if the user typed it after \"/workflow_name\". Null if the workflow needs no input."
+                    },
+                    "schedule": {
+                        "type": "string",
+                        "description": "A 5-field cron expression (minute hour day-of-month month day-of-week), evaluated in UTC. E.g. \"0 8 * * *\" runs daily at 08:00 UTC."
+                    },
+                },
+                "required": ["workflow_name", "workflow_input", "schedule"],
+                "additionalProperties": False,
+            },
+            "strict": True
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "int_list_scheduled_jobs",
+            "description": "List the jobs scheduled from this conversation, with each one's id, workflow, input, cron schedule, and next run time in UTC.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": False,
+            },
+            "strict": True
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "int_cancel_scheduled_job",
+            "description": "Permanently cancel one job scheduled from this conversation. List the jobs first to get its id. If more than one job fits what the user asked to cancel, ask them which one instead of guessing.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "job_id": {
+                        "type": "string",
+                        "description": "The job's id, exactly as listed."
+                    },
+                },
+                "required": ["job_id"],
                 "additionalProperties": False,
             },
             "strict": True
