@@ -2,6 +2,7 @@ from config import get_llm_provider, OLLAMA_BASE_URL, get_model, ANTHROPIC_MAX_T
 from .anthropic import AnthropicLLM
 from .ollama import OllamaLLM
 from .openai import OpenAILLM
+from .tools_not_supported import ToolsNotSupported
 
 def get_llm():
     # Choose the provider's class based on the provider and other configurations set in src/config/provider.py

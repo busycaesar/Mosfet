@@ -1,5 +1,5 @@
 from .base import LLMProvider
-from anthropic import Anthropic
+from anthropic import Anthropic, BadRequestError, omit
 import json
 from types import SimpleNamespace
 
@@ -12,13 +12,17 @@ class AnthropicLLM(LLMProvider):
     def infer(self, messages, tools):
         system_message, user_llm_conversations = self._split_system_messages(messages)
 
-        raw_response = self.client.messages.create(
-            model=self.model,
-            max_tokens=self.max_tokens,
-            system=system_message,
-            messages=user_llm_conversations,
-            tools=self._convert_tools_declaration(tools)
-        )
+        try:
+            raw_response = self.client.messages.create(
+                model=self.model,
+                max_tokens=self.max_tokens,
+                system=system_message,
+                messages=user_llm_conversations,
+                tools=self._convert_tools_declaration(tools) or omit
+            )
+        except BadRequestError as error:
+            self._raise_if_tools_not_supported(error)
+            raise
 
         response_object = self._format_generated_response(raw_response)
 

@@ -1,5 +1,5 @@
 from .base import LLMProvider
-from openai import OpenAI
+from openai import BadRequestError, OpenAI, omit
 
 class OpenAILLM(LLMProvider):
     def __init__(self, api_key, model):
@@ -7,11 +7,15 @@ class OpenAILLM(LLMProvider):
         self.client = OpenAI(api_key=api_key)
 
     def infer(self, messages, tools):
-        completion = self.client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            tools=tools
-        )
+        try:
+            completion = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                tools=tools or omit
+            )
+        except BadRequestError as error:
+            self._raise_if_tools_not_supported(error)
+            raise
 
         return completion.choices[0].message
 
