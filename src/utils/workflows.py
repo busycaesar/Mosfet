@@ -24,12 +24,13 @@ def get_workflow_by_name(name):
     return workflow_path.read_text().strip()
 
 def load_workflow(name):
-    # Returns the workflow's steps plus those of every nested workflow (at any depth), and every tool approved for any of them; visited guards against cycles.
+    # Returns the workflow's steps plus those of every nested workflow (at any depth), every tool approved for any of them, and whether any of them declares a tool or MCP tool; visited guards against cycles.
     if get_workflow_by_name(name) is None:
         return None
 
     index = get_workflows_list()
     sections, tools, visited, pending = [], [], set(), [name]
+    declares_tools = False
 
     while pending:
         current = pending.pop(0)
@@ -49,8 +50,9 @@ def load_workflow(name):
         entry = index.get(current, {})
         tools += entry.get("allowed_tools", []) + entry.get("allowed_mcp_tools", [])
         pending += entry.get("workflows", [])
+        declares_tools = declares_tools or bool(entry.get("tools") or entry.get("mcp_tools"))
 
-    return "\n\n".join(sections), list(dict.fromkeys(tools))
+    return "\n\n".join(sections), list(dict.fromkeys(tools)), declares_tools
 
 def update_workflows_index(name, description, skills, workflows, tools, mcp_tools):
     index = get_workflows_list()

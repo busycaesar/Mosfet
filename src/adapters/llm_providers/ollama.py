@@ -1,5 +1,5 @@
 from .base import LLMProvider
-from openai import OpenAI
+from openai import BadRequestError, OpenAI, omit
 
 class OllamaLLM(LLMProvider):
     def __init__(self, base_url, model):
@@ -9,11 +9,15 @@ class OllamaLLM(LLMProvider):
         self.client = OpenAI(api_key="ollama", base_url=base_url)
 
     def infer(self, messages, tools):
-        completion = self.client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            tools=tools
-        )
+        try:
+            completion = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                tools=tools or omit
+            )
+        except BadRequestError as error:
+            self._raise_if_tools_not_supported(error)
+            raise
 
         return completion.choices[0].message
 
