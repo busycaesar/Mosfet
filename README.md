@@ -51,6 +51,7 @@ Mosfet is an LLM-powered agent that you extend by adding **Skills**, **Tools**, 
 - Chat with the agent through your terminal or other communication channels.
 - The agent can create skills for itself and reuse them whenever they apply.
 - Save a multi-step procedure as a workflow, combining skills, tools, and other workflows, and run it again whenever you need it.
+- From a channel that stays online, schedule a workflow to run on a recurring timetable, so the agent can message you first with the result instead of only responding when spoken to. Ask the agent to list or cancel your schedules anytime.
 - Connect the agent to MCP servers so it can use their tools.
 - The agent can work through multiple steps on its own before giving you a final answer.
 - See what the agent is doing as it works, like loading a skill or calling a tool, instead of just watching a spinner.
@@ -69,7 +70,7 @@ Mosfet is an LLM-powered agent that you extend by adding **Skills**, **Tools**, 
  ├── llm.py                      # Guarded LLM entry point used by the agent loop
  ├── config_setup.py             # Guided setup/update for provider config and credentials
  ├── update.py                   # Updates the local install to the latest release
- ├── core/                       # Agent loop and skill/tool orchestration
+ ├── core/                       # Agent loop, skill/tool orchestration, and the job scheduler
  ├── adapters/                   # Per-provider LLM and web-search adapters behind common interfaces
  │    ├── llm_providers/
  │    └── web_search_providers/
