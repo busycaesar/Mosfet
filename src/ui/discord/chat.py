@@ -1,6 +1,6 @@
 import asyncio
 import discord
-from core import invoke_agent
+from core import invoke_agent, run_scheduler
 from config import DISCORD_MESSAGE_LIMIT
 from .client import client
 from .interaction import confirm_tool_call
@@ -15,6 +15,16 @@ async def send_long_message(channel, text):
     """
     for i in range(0, len(text), DISCORD_MESSAGE_LIMIT):
         await channel.send(text[i:i + DISCORD_MESSAGE_LIMIT])
+
+async def send_message(destination, text):
+    """Messages the user unprompted, outside of a reply. Direct-message channels often aren't cached, hence the fetch."""
+    channel = client.get_channel(destination) or await client.fetch_channel(destination)
+    await send_long_message(channel, text)
+
+@client.event
+async def setup_hook():
+    # setup_hook runs once at startup, while on_ready can fire again on every reconnect, which would start duplicate scheduler loops. The task is kept on the client because asyncio only holds a weak reference to it.
+    client.scheduler_task = asyncio.create_task(run_scheduler("discord", send_message))
 
 @client.event
 async def on_ready():
@@ -41,7 +51,7 @@ async def on_message(message):
         try:
             response = await asyncio.to_thread(
                 invoke_agent, 
-                conversation.messages, 
+                conversation, 
                 message.content, 
                 confirm_tool_call_in_channel, 
                 activity_log

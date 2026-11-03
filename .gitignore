@@ -141,3 +141,4 @@ dist
 .yarn/install-state.gz
 .pnp.*
 runtime/sessions/
+runtime/schedule/

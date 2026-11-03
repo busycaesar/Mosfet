@@ -1,6 +1,7 @@
 from llm import get_llm, ToolsNotSupported
 from .slash_command import parse_slash_command
 from .tool_calls import run_tool_call
+from .tool_context import ToolContext
 from .once_per_run_notice import OncePerRunNotice
 from extensions import get_tools
 from utils import clean_response
@@ -8,14 +9,15 @@ from config import TOOLS_UNSUPPORTED_CHAT_NOTICE, TOOLS_UNSUPPORTED_WORKFLOW_NOT
 
 chat_notice = OncePerRunNotice(TOOLS_UNSUPPORTED_CHAT_NOTICE)
 
-def invoke_agent(messages, user_input, confirm_tool_call, activity_log):
+def invoke_agent(session, user_input, confirm_tool_call, activity_log):
+    messages = session.messages
     original_length = len(messages)
 
     try:
-        allowed_tools, requires_tools = build_context(messages, user_input, activity_log)
+        tool_scope, requires_tools = build_context(messages, user_input, activity_log)
 
         try:
-            response = agent_loop(messages, confirm_tool_call, activity_log, allowed_tools)
+            response = agent_loop(messages, ToolContext(session, confirm_tool_call), activity_log, tool_scope)
 
         except ToolsNotSupported:
             # A workflow that declares tools can't do its job without them, so a reply without tools would only pretend it ran.
@@ -34,7 +36,7 @@ def invoke_agent(messages, user_input, confirm_tool_call, activity_log):
     return response
 
 def build_context(messages, user_input, activity_log):
-    slash_command_content, allowed_tools, requires_tools = parse_slash_command(user_input)
+    slash_command_content, tool_scope, requires_tools = parse_slash_command(user_input)
 
     if slash_command_content is not None:
         messages.append({"role": "system", "content": slash_command_content})
@@ -42,13 +44,13 @@ def build_context(messages, user_input, activity_log):
 
     messages.append({"role": "user", "content": user_input})
 
-    return allowed_tools, requires_tools
+    return tool_scope, requires_tools
 
-def agent_loop(messages, confirm_tool_call, activity_log, allowed_tools):
+def agent_loop(messages, context, activity_log, tool_scope):
     llm = get_llm()
 
     while True:
-        llm_message = llm.infer(messages, get_tools())
+        llm_message = llm.infer(messages, tool_scope.filter(get_tools()))
 
         if not llm_message.tool_calls:
             activity_log.before_response()
@@ -57,7 +59,7 @@ def agent_loop(messages, confirm_tool_call, activity_log, allowed_tools):
         messages.append(llm.format_llm_response(llm_message))
 
         tool_call_results = [
-            (tool_call.id, run_tool_call(tool_call, confirm_tool_call, activity_log, allowed_tools))
+            (tool_call.id, run_tool_call(tool_call, context, activity_log, tool_scope))
             for tool_call in llm_message.tool_calls
         ]
 

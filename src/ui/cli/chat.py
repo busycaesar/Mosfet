@@ -62,7 +62,7 @@ def run_cli_chat():
 
                 activity_log = CLIActivityLog()
                 response = invoke_agent(
-                    conversation.messages, 
+                    conversation, 
                     user_input, 
                     confirm_tool_call_while_paused, 
                     activity_log
